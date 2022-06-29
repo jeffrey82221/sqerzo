@@ -43,10 +43,12 @@ class SQErzoGraph:
             return
 
         # Check if is in cache
-        if node_cache := self.cache.get_id(node_id):
+        node_cache = self.cache.get_id(node_id)
+        if node_cache:
             return node_cache
-
-        if found := self.db_engine.get_node_by_id(node_id):
+        
+        found = self.db_engine.get_node_by_id(node_id)
+        if found:
             node = map_class.from_query_results(found)
 
             self.cache.save_id(node_id, node)

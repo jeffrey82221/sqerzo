@@ -28,7 +28,8 @@ class CypherSQErzoGraphConnection(SQErzoGraphConnection):
         MATCH (n {{ identity: '{node_id}' }})
         RETURN n
         """
-        if result := self.query_response(q):
+        result = self.query_response(q)
+        if result:
             for res in result:
                 if type(res) is list:
                     return res[0]

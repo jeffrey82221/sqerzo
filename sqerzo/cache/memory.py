@@ -4,8 +4,8 @@ class MemoryGraphNodeCache:
         self._cache = {}
 
     def make_key(self, node):
-
-        if k := node.identity:
+        k = node.identity
+        if k:
             return k
         else:
             k = "#".join(

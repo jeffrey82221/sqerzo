@@ -90,12 +90,12 @@ class GraphElementMetaClass(type):
             #
             log.debug(f"Trying to deduce Node label from class name: "
                       f"'{class_name}'")
-
-            if (index := class_name.rfind("Node")) != -1:
-                label = class_name[:index]
-
-            elif (index := class_name.rfind("Edge")) != -1:
-                label = class_name[:index]
+            index_node = class_name.rfind("Node")
+            index_edge = class_name.rfind("Edge")
+            if index_node != -1:
+                label = class_name[:index_node]
+            elif index_edge != -1:
+                label = class_name[:index_edge]
             else:
                 label = None
 
@@ -135,10 +135,11 @@ class GraphElementMetaClass(type):
             #
             # Check attribute values are in class properties
             #
-            if missing := o.__keys__ - class_props:
+            keys_missing = o.__keys__ - class_props
+            if keys_missing:
                 raise SQErzoException(
                     f"__keys__ has a value missing in class property "
-                    f"'{class_name}': {missing} "
+                    f"'{class_name}': {keys_missing} "
                 )
 
 
@@ -154,10 +155,11 @@ class GraphElementMetaClass(type):
             #
             # Check attribute values are in class properties
             #
-            if missing := o.__unique__ - class_props:
+            unique_missing = o.__unique__ - class_props
+            if unique_missing:
                 raise SQErzoException(
                     f"__unique__ has a value missing in class property "
-                    f"'{class_name}': {missing} "
+                    f"'{class_name}': {unique_missing} "
                 )
         else:
             o.__unique__ = set()
@@ -175,10 +177,11 @@ class GraphElementMetaClass(type):
             #
             # Check attribute values are in class properties
             #
-            if missing := o.__indexes__ - class_props:
+            indexes_missing = o.__indexes__ - class_props
+            if indexes_missing:
                 raise SQErzoException(
                     f"__indexes__ has a value missing in class property "
-                    f"'{class_name}': {missing} "
+                    f"'{class_name}': {indexes_missing} "
                 )
         else:
             o.__indexes__ = {"identity"}
