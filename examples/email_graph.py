@@ -97,7 +97,8 @@ def create_graph(database_path: str, db_type: str, count: int = 50):
         #
         # Check if mail is a reply of other, link them
         #
-        if reply_to := user_email.get("In-Reply-To", None):
+        reply_to = user_email.get("In-Reply-To", None)
+        if reply_to:
             in_reply_rel.append((email, reply_to))
 
         from_person = PersonNode(
@@ -161,7 +162,8 @@ def create_graph(database_path: str, db_type: str, count: int = 50):
     # Link emails
     #
     for source_node, dst_in_reply in in_reply_rel:
-        if reply_node := gh.fetch_one(MailNode, **{"message_id": dst_in_reply}):
+        reply_node = gh.fetch_one(MailNode, **{"message_id": dst_in_reply})
+        if reply_node:
             reply_node.add_label("Reply")
 
             gh.update(reply_node)
