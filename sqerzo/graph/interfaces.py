@@ -15,23 +15,6 @@ class ResultElement:
     labels: List[str] = None
     properties: dict = None
 
-class SQErzoQueryResponse:
-
-    @abc.abstractmethod
-    def __init__(self, graph: SQErzoGraphConnection, query: str, **kwargs):
-        raise NotImplementedError()
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        pass
-
-    @abc.abstractmethod
-    def __iter__(self):
-        raise NotImplementedError()
-
-
 class SQErzoGraphConnection(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
@@ -95,5 +78,25 @@ class SQErzoGraphConnection(metaclass=abc.ABCMeta):
 
     def query_builder(self, graph) -> Query:
         return Query(graph)
+    
+    
+class SQErzoQueryResponse:
+
+    @abc.abstractmethod
+    def __init__(self, graph: SQErzoGraphConnection, query: str, **kwargs):
+        raise NotImplementedError()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        pass
+
+    @abc.abstractmethod
+    def __iter__(self):
+        raise NotImplementedError()
+
+
+
 
 __all__ = ("ResultElement", "SQErzoGraphConnection",)

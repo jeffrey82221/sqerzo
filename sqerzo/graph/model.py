@@ -223,7 +223,7 @@ class GraphElement(metaclass=GraphElementMetaClass):
         self.__labels__.add(label_name)
 
     @abc.abstractmethod
-    def clone(self, exclude: List[str] = None) -> GraphElement:
+    def clone(self, exclude: List[str] = None) -> GraphElementMetaClass:
         raise NotImplementedError()
 
     @abc.abstractmethod
