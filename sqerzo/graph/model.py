@@ -1,10 +1,8 @@
-from __future__ import annotations
-
 import abc
 import hashlib
 import logging
 
-from typing import List
+from typing import List, get_type_hints
 from collections import Iterable
 from dataclasses import dataclass, field
 
@@ -257,7 +255,7 @@ class GraphNode(GraphElement):
         }
         custom_class_properties = {
             k: result_data.properties[k]
-            for k in cls.__annotations__.keys()
+            for k in get_type_hints(cls).keys()
         }
 
         config = {
