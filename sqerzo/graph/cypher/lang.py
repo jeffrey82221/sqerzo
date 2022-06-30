@@ -3,7 +3,7 @@
 # Utils
 # -------------------------------------------------------------------------
 from typing import List
-
+from ..model import GraphNode, GraphEdge
 from ...config import SQErzoConfig
 
 def scape_string(text: str):
@@ -49,7 +49,7 @@ def prepare_params(values: dict, operation="insert", node_name="a") -> List[str]
 
 
 
-def create_query(node, partial: bool = False):
+def create_query(node: GraphNode, partial: bool = False):
 
     if not node.identity:
         node.identity = node.make_identity()
@@ -72,4 +72,23 @@ def create_query(node, partial: bool = False):
 
     return f"{'' if partial else 'CREATE '} (:{labels} {prop})"
 
-__all__ = ("create_query", )
+def create_edge_property_query(edge: GraphEdge):
+    if not edge.identity:
+        edge.identity = edge.make_identity()
+
+        # Do not include in dirty properties
+        del edge.__dirty_properties__["identity"]
+
+    tmp_prop = [f"identity: '{edge.identity}'"]
+    tmp_prop.extend(prepare_params(edge.properties))
+    tmp_prop.extend(prepare_params({
+        k: v
+        for k, v in edge.__dict__.items()
+        if
+        k not in ("properties", "identity", "source", "destination") and not k.startswith("_")
+    }))
+
+    prop = ", ".join(tmp_prop)
+    return prop
+
+__all__ = ("create_query", "create_edge_property_query")

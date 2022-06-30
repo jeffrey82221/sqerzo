@@ -19,7 +19,8 @@ class CypherSQErzoTransaction(SQErzoTransaction):
                   partial_edged: dict):
 
         if partial_query_nodes:
-            node_query = f"CREATE {', '.join(partial_query_nodes.values())}"
+            node_query_list = [create_query(node, partial=True) for node in partial_query_nodes.values()]
+            node_query = f"CREATE {', '.join(node_query_list)}"
             self.graph.db_engine.query(node_query)
 
         #
@@ -41,15 +42,14 @@ class CypherSQErzoTransaction(SQErzoTransaction):
                 }
                 for b in edges
             ]
-
-            q = f"""
+            
+            edge_query = f"""
             UNWIND $batch as row
             MATCH (from:{edge.source.labels()} {{ identity: row.identity_from }})
             MATCH (to:{edge.destination.labels()} {{ identity: row.identity_to }})
             CREATE (from)-[:{edge.labels()} {{ identity: row.identity_edge }}]->(to)
             """
-
-            self.graph.db_engine.query(q, batch=batch)
+            self.graph.db_engine.query(edge_query, batch=batch)
 
 
     def commit(self):
@@ -74,13 +74,14 @@ class CypherSQErzoTransaction(SQErzoTransaction):
             element = self._commit.pop()
 
             if isinstance(element, GraphNode):
+                element.make_identity()
                 key = "".join(getattr(element, x) for x in element.__keys__)
 
                 if key in partial_query_nodes_processed:
                     continue
 
                 partial_query_nodes_processed.add(key)
-                partial_query_nodes[key] = create_query(element, partial=True)
+                partial_query_nodes[key] = element
 
             elif isinstance(element, GraphEdge):
                 label_edge = element.labels()

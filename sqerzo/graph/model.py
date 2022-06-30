@@ -253,9 +253,10 @@ class GraphNode(GraphElement):
             k:v for k, v in result_data.properties.items()
             if k not in ("identifier", "alias")
         }
+        ks = [k for k in get_type_hints(cls).keys() if k != 'properties']
         custom_class_properties = {
             k: result_data.properties[k]
-            for k in get_type_hints(cls).keys()
+            for k in ks    
         }
 
         config = {

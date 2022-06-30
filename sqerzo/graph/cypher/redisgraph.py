@@ -21,7 +21,7 @@ class RedisGraphSQErzoQueryResponse(SQErzoQueryResponse):
 
     def __iter__(self):
         query_results = self.graph.connection.query(self.query, self.params)
-
+        print(f'[redisgraph:RedisGraphSQErzoQueryResponse:__iter__] query_results.result_set: {query_results.result_set}')
         for res in query_results.result_set:
 
             yield [
