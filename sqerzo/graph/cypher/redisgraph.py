@@ -4,7 +4,10 @@ import urllib.parse as pr
 from typing import Iterable, List, Type, Tuple
 
 from redisgraph import Graph
+from redisgraph.edge import Edge
+from redisgraph.node import Node
 
+from .lang import create_query
 from ...exceptions import *
 from ..model import GraphElement, GraphNode
 from .transaction import CypherSQErzoTransaction
@@ -23,17 +26,34 @@ class RedisGraphSQErzoQueryResponse(SQErzoQueryResponse):
         query_results = self.graph.connection.query(self.query, self.params)
         print(f'[redisgraph:RedisGraphSQErzoQueryResponse:__iter__] query_results.result_set: {query_results.result_set}')
         for res in query_results.result_set:
-
-            yield [
-                    ResultElement(
-                        id=node.id,
-                        alias=query_results.header[i][1].decode(),
-                        labels=list(node.label),
-                        properties=node.properties
+            result_list = []
+            for i, element in enumerate(res):
+                print(f'[redisgraph:RedisGraphSQErzoQueryResponse:__iter__] element - res[{i}]: {element}')
+                if isinstance(element, Node):
+                    result_list.append(
+                        ResultElement(
+                            id=element.id,
+                            alias=query_results.header[i][1].decode(),
+                            labels=list(element.label),
+                            properties=element.properties
+                        )
                     )
-                for i, node in enumerate(res)
-            ]
+                elif isinstance(element, Edge):
+                    result_list.append(
+                        ResultElement(
+                            id=element.id,
+                            alias=query_results.header[i][1].decode(),
+                            labels=list(element.relation),
+                            properties=element.properties
+                        )
+                    )
+                else:
+                    raise ValueError('Result is not Node or Edge')
+            yield result_list
 
+# TODO:
+# 1. [ ] Fix - Do not let seperate the label string into characters:
+# ResultElement(id=1, alias='u', labels=['U', 's', 'e', 'r'], properties={'identity': '868497784832', 'name': 'DName-0'})]
 
 class RedisSQErzoTransaction(CypherSQErzoTransaction):
     SUPPORTED_TYPES = ("str", "int", "float", "bool")
@@ -42,11 +62,12 @@ class RedisSQErzoTransaction(CypherSQErzoTransaction):
                   partial_query_nodes: dict,
                   partial_edged: dict):
         if partial_query_nodes:
-            node_query = f"CREATE {', '.join(partial_query_nodes.values())}"
+            node_query_list = [create_query(node, partial=True) for node in partial_query_nodes.values()]
+            node_query = f"CREATE {', '.join(node_query_list)}"
             self.graph.db_engine.query(node_query)
 
         #
-        # Get al Edges
+        # Get all Edges
         #
         for edges in partial_edged.values():
 
