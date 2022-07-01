@@ -1,9 +1,9 @@
 """
 TODO:
-    - check what is in neo4j._sync.work.result.Result's
-        - record
-        - record.keys()
-        - record.values(k)
+- [X] check what is in neo4j._sync.work.result.Result's
+    - record -> an encapsulated neo4j result object.
+    - record.keys() -> alias. e.g., If we have (n)-[r]->(k), n, r, and k are alias. 
+    - record.values(k) -> <Node> or <Relationship> object of neo4j package
 """
 import urllib.parse as pr
 
@@ -57,7 +57,7 @@ class Neo4jSQErzoQueryResponse(SQErzoQueryResponse):
                                 alias=k
                             ))
                         else:
-                            raise ValueError('Result not nodes or edges')
+                            raise ValueError('Result is not Node or Edge')
 
                 yield res
 
