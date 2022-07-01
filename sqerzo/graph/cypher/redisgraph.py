@@ -14,6 +14,9 @@ from .transaction import CypherSQErzoTransaction
 from .interfaces import ResultElement, CypherSQErzoGraphConnection
 from ..interfaces import SQErzoQueryResponse, SQErzoGraphConnection
 
+# TODO:
+# 1. [X] Fix - Do not let the label string or relation be seperated into list of characters:
+# ResultElement(id=1, alias='u', labels=['U', 's', 'e', 'r'], properties={'identity': '868497784832', 'name': 'DName-0'})]
 
 class RedisGraphSQErzoQueryResponse(SQErzoQueryResponse):
 
@@ -34,7 +37,7 @@ class RedisGraphSQErzoQueryResponse(SQErzoQueryResponse):
                         ResultElement(
                             id=element.id,
                             alias=query_results.header[i][1].decode(),
-                            labels=list(element.label),
+                            labels=element.labels,
                             properties=element.properties
                         )
                     )
@@ -43,7 +46,7 @@ class RedisGraphSQErzoQueryResponse(SQErzoQueryResponse):
                         ResultElement(
                             id=element.id,
                             alias=query_results.header[i][1].decode(),
-                            labels=list(element.relation),
+                            labels=[element.relation],
                             properties=element.properties
                         )
                     )
@@ -51,9 +54,7 @@ class RedisGraphSQErzoQueryResponse(SQErzoQueryResponse):
                     raise ValueError('Result is not Node or Edge')
             yield result_list
 
-# TODO:
-# 1. [ ] Fix - Do not let seperate the label string into characters:
-# ResultElement(id=1, alias='u', labels=['U', 's', 'e', 'r'], properties={'identity': '868497784832', 'name': 'DName-0'})]
+
 
 class RedisSQErzoTransaction(CypherSQErzoTransaction):
     SUPPORTED_TYPES = ("str", "int", "float", "bool")
@@ -90,14 +91,14 @@ class RedisSQErzoTransaction(CypherSQErzoTransaction):
                 for b in edges
             ]
 
-            q = f"""
+            edge_query = f"""
             UNWIND $batch as row
             MATCH (from:{edge.source.labels()} {{ identity: row[0] }})
             MATCH (to:{edge.destination.labels()} {{ identity: row[1] }})
             CREATE (from)-[:{edge.labels()} {{ identity: row[2] }}]->(to)
             """
-
-            self.graph.db_engine.query(q, batch=batch)
+            print(f'[RedisSQErzoTransaction: dump_data] edge_query: \n{edge_query}')
+            self.graph.db_engine.query(edge_query, batch=batch)
 
 
 class RedisSQErzoGraphConnection(CypherSQErzoGraphConnection):
