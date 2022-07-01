@@ -27,11 +27,9 @@ class RedisGraphSQErzoQueryResponse(SQErzoQueryResponse):
 
     def __iter__(self):
         query_results = self.graph.connection.query(self.query, self.params)
-        print(f'[redisgraph:RedisGraphSQErzoQueryResponse:__iter__] query_results.result_set: {query_results.result_set}')
         for res in query_results.result_set:
             result_list = []
             for i, element in enumerate(res):
-                print(f'[redisgraph:RedisGraphSQErzoQueryResponse:__iter__] element - res[{i}]: {element}')
                 if isinstance(element, Node):
                     result_list.append(
                         ResultElement(
@@ -97,7 +95,6 @@ class RedisSQErzoTransaction(CypherSQErzoTransaction):
             MATCH (to:{edge.destination.labels()} {{ identity: row[1] }})
             CREATE (from)-[:{edge.labels()} {{ identity: row[2] }}]->(to)
             """
-            print(f'[RedisSQErzoTransaction: dump_data] edge_query: \n{edge_query}')
             self.graph.db_engine.query(edge_query, batch=batch)
 
 

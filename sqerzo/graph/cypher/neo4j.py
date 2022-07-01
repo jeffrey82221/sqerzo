@@ -33,15 +33,12 @@ class Neo4jSQErzoQueryResponse(SQErzoQueryResponse):
         with self.graph.connection.session() as session:
 
             ret = session.run(self.query, **self.params)
-            # print(f'[neo4j:Neo4jSQErzoQueryResponse:__iter__] ret:\n{ret}')
             for record in ret:
                 
                 res = []
 
                 for k in record.keys():
-                    # print(f'[neo4j:Neo4jSQErzoQueryResponse] k in record.keys():\n{k}')
                     for element in record.values(k):
-                        print(f'[neo4j:Neo4jSQErzoQueryResponse] element in record.values(k):\n{element}')
                         if isinstance(element, Node):
                             res.append(ResultElement(
                                 id=element.id,
